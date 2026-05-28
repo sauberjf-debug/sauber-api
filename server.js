@@ -5,32 +5,22 @@ const fetch = require('node-fetch');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const TAG = 'af20251213135858';
-const CLIENT_ID = '446255657049347';
-const CLIENT_SECRET = process.env.ML_SECRET;
 
 app.use(cors());
-
-async function getToken() {
-  const resp = await fetch('https://api.mercadolibre.com/oauth/token', {
-    method: 'POST',
-    headers: {'Content-Type':'application/x-www-form-urlencoded'},
-    body: `grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`
-  });
-  const data = await resp.json();
-  return data.access_token;
-}
 
 app.get('/buscar', async (req, res) => {
   const query = req.query.q || 'limpeza higiene';
   const limite = parseInt(req.query.limite) || 32;
   try {
-    const token = await getToken();
-    const url = `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=${limite}&condition=new`;
+    const url = `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=${limite}&condition=new&sort=relevance`;
     const response = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; SAUberBot/1.0)',
+        'Accept': 'application/json'
+      }
     });
     const data = await response.json();
-    console.log('ML response:', JSON.stringify(data).substring(0, 500));
+    console.log('Status:', response.status, 'Total:', data.paging?.total);
     const produtos = (data.results || []).map(item => ({
       id: item.id,
       titulo: item.title,
