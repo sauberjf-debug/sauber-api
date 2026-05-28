@@ -30,6 +30,7 @@ app.get('/buscar', async (req, res) => {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await response.json();
+    console.log('ML response:', JSON.stringify(data).substring(0, 500));
     const produtos = (data.results || []).map(item => ({
       id: item.id,
       titulo: item.title,
